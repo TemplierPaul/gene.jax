@@ -100,7 +100,7 @@ def min_max_scaler(x):
 
 
 def _get_env_sizes(env_name: str):
-    from brax.v1.envs import (
+    from brax.envs import (
         acrobot,
         ant,
         fast,
