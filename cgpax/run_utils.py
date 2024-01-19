@@ -2,8 +2,8 @@ from datetime import datetime
 from functools import partial
 from typing import List, Callable, Tuple, Dict, Union, Set
 
-from brax.v1 import envs
-from brax.v1.envs.wrappers import EpisodeWrapper
+from brax import envs
+from brax.envs.wrappers import EpisodeWrapper
 from wandb.apis.public import Run
 
 from jax import vmap, jit, random

@@ -132,41 +132,62 @@ if __name__ == "__main__":
         help="User used to log on weights and biases.",
     )
     parser.add_argument(
-        "-k",
+        "--top_k",
         type=int,
         default=10,
         help="Number of best individuals to take.",
     )
+    parser.add_argument(
+        "--task",
+        type=str,
+        default="halfcheetah",
+        help="Task to test on.",
+        choices=["halfcheetah", "walker2d", "hopper", "swimmer"],
+    )
+    parser.add_argument(
+        "--epoch",
+        type=int,
+        default=None,
+        help="Epoch to get genome from.",
+    )
     args = parser.parse_args()
 
     RUN_ID = "sureli/cgp-gene/c4v8hc53"
-    tasks = ["halfcheetah", "walker2d", "hopper", "swimmer"]
-    extra_tags = [f"k-{args.k}-best"]
+    # tasks = ["halfcheetah", "walker2d", "hopper", "swimmer"]
+    extra_tags = [f"k-{args.top_k}-best"]
 
     # NOTE - Load cgp genomes to evaluate
-    reference_epoch_ids = get_k_best_genome_ids(RUN_ID, k=args.k)
+    reference_epoch_ids = get_k_best_genome_ids(RUN_ID, k=args.top_k)
     cgp_genomes_dict, meta_config = get_genomes_from_run(RUN_ID, reference_epoch_ids)
+    
+    if args.epoch is not None:
+        cgp_genomes_dict = {args.epoch: cgp_genomes_dict[args.epoch]}
 
     # NOTE - For each cgp genome, evaluate and compare
+    for epoch_id, cgp_genome in cgp_genomes_dict.items():
+        print(f"Epoch {epoch_id}")
+        print(cgp_genome.shape)
+        # genome_to_readable(cgp_genome, meta_config, filename=f"epoch_{epoch_id}.png")
 
     for epoch_id, cgp_genome in cgp_genomes_dict.items():
         # NOTE - evaluate cgp genome on each defined task
-        for task in tasks:
-            # NOTE - fix config file. Base new config file on w2d curriculum config
-            curriculum_config = base_to_task(
-                meta_config["curriculum"]["w2d_1000"], task
-            )
-            # NOTE - add epoch_id to config file
-            curriculum_config["epoch_id"] = epoch_id
+        # for task in tasks:
+        task = args.task
+        # NOTE - fix config file. Base new config file on w2d curriculum config
+        curriculum_config = base_to_task(
+            meta_config["curriculum"]["w2d_1000"], task
+        )
+        # NOTE - add epoch_id to config file
+        curriculum_config["epoch_id"] = epoch_id
 
-            comparison_experiment_cgp(
-                config=curriculum_config,
-                cgp_config=meta_config["cgp_config"],
-                # NOTE - Its a mess, we need to encapsulate the genomes correctly
-                # cgp_df_genome_archive: dict[int, dict["top_3", list[genomes]]]
-                cgp_df_genome_archive={"0": {"top_3": [cgp_genome]}},
-                project=args.project,
-                entity=args.entity,
-                extra_tags=extra_tags,
-                seeds=[285033, 99527, 7],
-            )
+        comparison_experiment_cgp(
+            config=curriculum_config,
+            cgp_config=meta_config["cgp_config"],
+            # NOTE - Its a mess, we need to encapsulate the genomes correctly
+            # cgp_df_genome_archive: dict[int, dict["top_3", list[genomes]]]
+            cgp_df_genome_archive={"0": {"top_3": [cgp_genome]}},
+            project=args.project,
+            entity=args.entity,
+            extra_tags=extra_tags,
+            seeds=[285033, 99527, 7],
+        )

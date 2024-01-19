@@ -2,11 +2,11 @@ import os
 from typing import Tuple
 
 import jax.numpy as jnp
-from brax.v1 import envs
-from brax.v1.envs.wrappers import EpisodeWrapper
+from brax import envs
+from brax.envs.wrappers import EpisodeWrapper
 
 from jax import random
-from brax.v1.io import html
+from brax.io import html
 import cgpax.jax_encoding
 
 from jax import jit

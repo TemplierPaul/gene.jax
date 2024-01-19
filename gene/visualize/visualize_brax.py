@@ -76,7 +76,7 @@ def visualize_brax(
 
 def render_brax(output_file: Path, env, pipeline_states: list, use_v1: bool = True):
     if use_v1:
-        from brax.v1.io import html as html_v1
+        from brax.io import html as html_v1
 
         html_string = html_v1.render(
             env.sys,

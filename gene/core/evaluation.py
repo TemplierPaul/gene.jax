@@ -58,24 +58,24 @@ def rollout_gymnax_task(
 
 
 def get_braxv1_env(config: dict):
-    from brax.v1.envs.wrappers import EpisodeWrapper as EpisodeWrapper_v1
-    from brax.v1.envs import acrobot
-    from brax.v1.envs import ant
-    from brax.v1.envs import fast
-    from brax.v1.envs import fetch
-    from brax.v1.envs import grasp
-    from brax.v1.envs import half_cheetah
-    from brax.v1.envs import hopper
-    from brax.v1.envs import humanoid
-    from brax.v1.envs import humanoid_standup
-    from brax.v1.envs import inverted_double_pendulum
-    from brax.v1.envs import inverted_pendulum
-    from brax.v1.envs import pusher
-    from brax.v1.envs import reacher
-    from brax.v1.envs import reacherangle
-    from brax.v1.envs import swimmer
-    from brax.v1.envs import ur5e
-    from brax.v1.envs import walker2d
+    from brax.envs.wrappers import EpisodeWrapper as EpisodeWrapper_v1
+    from brax.envs import acrobot
+    from brax.envs import ant
+    from brax.envs import fast
+    from brax.envs import fetch
+    from brax.envs import grasp
+    from brax.envs import half_cheetah
+    from brax.envs import hopper
+    from brax.envs import humanoid
+    from brax.envs import humanoid_standup
+    from brax.envs import inverted_double_pendulum
+    from brax.envs import inverted_pendulum
+    from brax.envs import pusher
+    from brax.envs import reacher
+    from brax.envs import reacherangle
+    from brax.envs import swimmer
+    from brax.envs import ur5e
+    from brax.envs import walker2d
 
     _envs_v1 = {
         "acrobot": acrobot.Acrobot,
