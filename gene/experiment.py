@@ -263,6 +263,7 @@ def comparison_experiment_cgp(
     seeds: list[int] = [56789, 98712, 1230],
     expe_time=None,
     extra_tags: list[str] = [],
+    selected_experiences: list[str] = ["cgp", "pL2", "L2", "direct"]
 ):
     """Takes a cgp distance function genome, evaluates it and compares it to
     gene encoding with pL2 and L2, direct encoding
@@ -287,100 +288,109 @@ def comparison_experiment_cgp(
         base_config["evo"]["population_size"] = 256
         base_config["seed"] = seed
 
-        # NOTE - 2. Use learned distance function to train a policy
-        cgp_df_config = deepcopy(base_config)
-        cgp_df_config["encoding"]["distance"] = ""
-        cgp_df_config["group"] = "learned"
-        validate_json(cgp_df_config)
 
-        # NOTE - Perform 4 runs with different best programs
-        for i, gen_archive in enumerate(
-            list(reversed(cgp_df_genome_archive.values()))[:2]
-        ):
-            for j, archived_genome in enumerate(gen_archive["top_3"][:2]):
-                with wandb.init(
-                    project=project,
-                    entity=entity,
-                    name=f"CC-cgp-learned-{i}-{j}",
-                    config=cgp_df_config,
-                    tags=[f"{expe_time}"] + extra_tags,
-                ) as wdb_cgp_df:
-                    Experiment(
-                        cgp_df_config,
-                        wdb_cgp_df,
-                        distance_function=CGPDistance(
-                            cgp_genome=archived_genome,
-                            cgp_config=cgp_config,
-                        ),
-                    ).run()
+        #######################################################################
+        if "cgp" in selected_experiences:
+            # NOTE - 2. Use learned distance function to train a policy
+            cgp_df_config = deepcopy(base_config)
+            cgp_df_config["encoding"]["distance"] = ""
+            cgp_df_config["group"] = "learned"
+            validate_json(cgp_df_config)
 
-                    # NOTE - Save cgp graph
-                    program_save_path = make_wdb_subfolder(wdb_cgp_df, "cgp_df")
-                    graph_save_path = str(
-                        program_save_path / f"graph_of_cgp_df_id_{config['epoch_id']}.png"
-                    )
-                    __save_graph__(
-                        genome=archived_genome,
-                        config=cgp_config,
-                        file=graph_save_path,
-                        input_color="green",
-                        output_color="red",
-                    )
-                    meta_save_genome(graph_save_path, wdb_cgp_df)
+            # NOTE - Perform 4 runs with different best programs
+            for i, gen_archive in enumerate(
+                list(reversed(cgp_df_genome_archive.values()))[:2]
+            ):
+                for j, archived_genome in enumerate(gen_archive["top_3"][:2]):
+                    with wandb.init(
+                        project=project,
+                        entity=entity,
+                        name=f"CC-cgp-learned-{i}-{j}",
+                        config=cgp_df_config,
+                        tags=[f"{expe_time}"] + extra_tags,
+                    ) as wdb_cgp_df:
+                        Experiment(
+                            cgp_df_config,
+                            wdb_cgp_df,
+                            distance_function=CGPDistance(
+                                cgp_genome=archived_genome,
+                                cgp_config=cgp_config,
+                            ),
+                        ).run()
 
-        # NOTE - 3.1. GENE w. pL2
-        conf_gene_pl2 = deepcopy(base_config)
-        conf_gene_pl2["encoding"]["distance"] = "pL2"
-        conf_gene_pl2["encoding"]["type"] = "gene"
-        conf_gene_pl2["group"] = "pL2"
-        validate_json(conf_gene_pl2)
+                        # NOTE - Save cgp graph
+                        program_save_path = make_wdb_subfolder(wdb_cgp_df, "cgp_df")
+                        graph_save_path = str(
+                            program_save_path / f"graph_of_cgp_df_id_{config['epoch_id']}.png"
+                        )
+                        __save_graph__(
+                            genome=archived_genome,
+                            config=cgp_config,
+                            file=graph_save_path,
+                            input_color="green",
+                            output_color="red",
+                        )
+                        meta_save_genome(graph_save_path, wdb_cgp_df)
+        #######################################################################
+        if "pL2" in selected_experiences:
+            # NOTE - 3.1. GENE w. pL2
+            conf_gene_pl2 = deepcopy(base_config)
+            conf_gene_pl2["encoding"]["distance"] = "pL2"
+            conf_gene_pl2["encoding"]["type"] = "gene"
+            conf_gene_pl2["group"] = "pL2"
+            validate_json(conf_gene_pl2)
 
-        with wandb.init(
-            project=project,
-            entity=entity,
-            name="CC-pL2",
-            config=conf_gene_pl2,
-            tags=[f"{expe_time}"] + extra_tags,
-        ) as wdb_gene_pl2:
-            Experiment(
-                conf_gene_pl2,
-                wdb_gene_pl2,
-            ).run()
+            with wandb.init(
+                project=project,
+                entity=entity,
+                name="CC-pL2",
+                config=conf_gene_pl2,
+                tags=[f"{expe_time}"] + extra_tags,
+            ) as wdb_gene_pl2:
+                Experiment(
+                    conf_gene_pl2,
+                    wdb_gene_pl2,
+                ).run()
+            print("[DEBUG] - finished")
 
-        # NOTE - 3.1. GENE w. L2
-        conf_gene_l2 = deepcopy(base_config)
-        conf_gene_l2["encoding"]["distance"] = "L2"
-        conf_gene_l2["encoding"]["type"] = "gene"
-        conf_gene_l2["group"] = "L2"
-        validate_json(conf_gene_l2)
+        #######################################################################
+        if "L2" in selected_experiences:
+            # NOTE - 3.1. GENE w. L2
+            conf_gene_l2 = deepcopy(base_config)
+            conf_gene_l2["encoding"]["distance"] = "L2"
+            conf_gene_l2["encoding"]["type"] = "gene"
+            conf_gene_l2["group"] = "L2"
+            validate_json(conf_gene_l2)
 
-        with wandb.init(
-            project=project,
-            entity=entity,
-            name="CC-L2",
-            config=conf_gene_l2,
-            tags=[f"{expe_time}"] + extra_tags,
-        ) as wdb_gene_l2:
-            Experiment(
-                conf_gene_l2,
-                wdb_gene_l2,
-            ).run()
+            with wandb.init(
+                project=project,
+                entity=entity,
+                name="CC-L2",
+                config=conf_gene_l2,
+                tags=[f"{expe_time}"] + extra_tags,
+            ) as wdb_gene_l2:
+                Experiment(
+                    conf_gene_l2,
+                    wdb_gene_l2,
+                ).run()
 
-        # NOTE - 3.1. Direct
-        conf_direct = deepcopy(base_config)
-        conf_direct["encoding"]["type"] = "direct"
-        conf_direct["encoding"]["distance"] = "pL2"
-        conf_direct["group"] = "direct"
-        validate_json(conf_direct)
+        #######################################################################
+        if "direct" in selected_experiences:
+            # NOTE - 3.1. Direct
+            conf_direct = deepcopy(base_config)
+            conf_direct["encoding"]["type"] = "direct"
+            conf_direct["encoding"]["distance"] = "pL2"
+            conf_direct["group"] = "direct"
+            validate_json(conf_direct)
 
-        with wandb.init(
-            project=project,
-            entity=entity,
-            name="CC-direct",
-            config=conf_direct,
-            tags=[f"{expe_time}"] + extra_tags,
-        ) as wdb_direct:
-            Experiment(
-                conf_direct,
-                wdb_direct,
-            ).run()
+            with wandb.init(
+                project=project,
+                entity=entity,
+                name="CC-direct",
+                config=conf_direct,
+                tags=[f"{expe_time}"] + extra_tags,
+            ) as wdb_direct:
+                Experiment(
+                    conf_direct,
+                    wdb_direct,
+                ).run()
