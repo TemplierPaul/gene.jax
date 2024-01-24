@@ -150,11 +150,26 @@ if __name__ == "__main__":
         default=None,
         help="Epoch to get genome from.",
     )
+    parser.add_argument(
+        "--algo",
+        type=str,
+        default="all",
+        help="Algorithm to test on.",
+        choices=["all", "cgp", "pL2", "L2", "direct"]
+    )
+    parser.add_argument(
+        "--tag",
+        type=str,
+        default=None,
+        help="Log tag",
+    )
     args = parser.parse_args()
 
     RUN_ID = "sureli/cgp-gene/c4v8hc53"
     # tasks = ["halfcheetah", "walker2d", "hopper", "swimmer"]
     extra_tags = [f"k-{args.top_k}-best"]
+    if args.tag is not None:
+        extra_tags.append(args.tag)
 
     # NOTE - Load cgp genomes to evaluate
     reference_epoch_ids = get_k_best_genome_ids(RUN_ID, k=args.top_k)
@@ -190,4 +205,5 @@ if __name__ == "__main__":
             entity=args.entity,
             extra_tags=extra_tags,
             seeds=[285033, 99527, 7],
+            selected_experiences=[args.algo]
         )
