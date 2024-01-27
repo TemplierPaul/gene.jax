@@ -171,6 +171,12 @@ if __name__ == "__main__":
         help="Seed to test on.",
     )
     parser.add_argument(
+        "--architecture",
+        type=int,
+        default="relu_tanh_linear",
+        help="Policy net architecture: tanh_linear or relu_tanh_linear.",
+    )
+    parser.add_argument(
         "--tag",
         type=str,
         default=None,
@@ -219,5 +225,6 @@ if __name__ == "__main__":
             entity=args.entity,
             extra_tags=extra_tags,
             seeds=[args.seed],
-            selected_experiences=[args.algo]
+            selected_experiences=[args.algo],
+            policy_architecture_used=args.architecture
         )
