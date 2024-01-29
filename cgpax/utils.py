@@ -6,8 +6,12 @@ from jax import jit
 
 from cgpax.jax_functions import available_functions
 
-import pygraphviz as pgv
-
+use_pgv = True
+try:
+    import pygraphviz as pgv
+except ImportError:
+    print("pygraphviz not installed, graph visualization will not work")
+    use_pgv = False
 
 @jit
 def identity(x):
@@ -189,7 +193,7 @@ def __reassign_variables__(
 
 def lgp_graph_from_genome(
     genome: jnp.ndarray, config: dict, x_color: str = "blue", y_color: str = "orange"
-) -> pgv.AGraph:
+) :
     lhs_genes, x_genes, y_genes, f_genes = jnp.split(genome, 4)
     lhs_genes += config["n_in"]
     functions = list(available_functions.values())
@@ -272,7 +276,7 @@ def lgp_graph_from_genome(
 
 def cgp_graph_from_genome(
     genome: jnp.ndarray, config: dict, x_color: str = "blue", y_color: str = "orange"
-) -> pgv.AGraph:
+) :
     n_in = config["n_in"]
     n_nodes = config["n_nodes"]
     x_genes, y_genes, f_genes, out_genes = jnp.split(

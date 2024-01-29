@@ -87,8 +87,10 @@ def learn_brax_task(
     rng, rng_init = jrd.split(rng, 2)
 
     decoder = get_decoder(config)(config, df)
-
-    strategy = evosax.Strategies[config["evo"]["strategy_name"]](
+    es_type = evosax.Strategies[config["evo"]["strategy_name"]]
+    print(f"ES type: {es_type}")
+    print(f"Genome size: {decoder.encoding_size()}")
+    strategy = es_type(
         popsize=config["evo"]["population_size"],
         num_dims=decoder.encoding_size(),
         **es_param_dict,

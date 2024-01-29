@@ -6,8 +6,15 @@ import jax.numpy as jnp
 
 from gene.experiment import comparison_experiment_cgp
 from gene.utils import fail_if_not_device, fix_config_file
+from gene.core.decoding import Decoder, get_decoder
 
-from cgpax.analysis.genome_analysis import __save_graph__, __write_readable_program__
+from cgpax.utils import use_pgv
+if use_pgv:
+    from cgpax.analysis.genome_analysis import __save_graph__
+else:
+    def __save_graph__(*args, **kwargs):
+        pass
+from cgpax.analysis.genome_analysis import __write_readable_program__
 
 
 def base_to_task(base_config: dict, target_task: str, n_generations: int = 1000):
@@ -158,6 +165,12 @@ if __name__ == "__main__":
         choices=["all", "cgp", "pL2", "L2", "direct"]
     )
     parser.add_argument(
+        "--es",
+        type=str,
+        default=None,
+        help="ES used",
+    )
+    parser.add_argument(
         "--tag",
         type=str,
         default=None,
@@ -194,6 +207,11 @@ if __name__ == "__main__":
         )
         # NOTE - add epoch_id to config file
         curriculum_config["epoch_id"] = epoch_id
+
+        if args.es is not None:
+            extra_tags.append(args.es)
+            print(f"Using {args.es} strategy")
+            curriculum_config["evo"]["strategy_name"] = args.es
 
         comparison_experiment_cgp(
             config=curriculum_config,
