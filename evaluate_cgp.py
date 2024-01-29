@@ -172,7 +172,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--architecture",
-        type=int,
+        type=str,
         default="relu_tanh_linear",
         help="Policy net architecture: tanh_linear or relu_tanh_linear.",
     )
