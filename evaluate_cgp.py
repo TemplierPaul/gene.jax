@@ -74,7 +74,7 @@ def get_k_best_genome_ids(
 
 def get_file(filepath: str, run):
     with open(run.file(filepath).download(replace=True).name, "rb") as f:
-        return jnp.load(f)
+        return jnp.load(f, allow_pickle=True)
 
 
 def get_genomes_from_run(run_id: str, epoch_ids: list[int]):
@@ -82,6 +82,7 @@ def get_genomes_from_run(run_id: str, epoch_ids: list[int]):
     run = wandb.Api().run(run_id)
     for epoch in epoch_ids:
         f = f"df_genomes/mg_{epoch}_best_genome.npy"
+        print(f"Getting {f}")
         genomes[epoch] = get_file(f, run)
 
     config = run.config
@@ -171,6 +172,18 @@ if __name__ == "__main__":
         help="ES used",
     )
     parser.add_argument(
+        "--seed",
+        type=int,
+        default=7,
+        help="Seed to test on.",
+    )
+    parser.add_argument(
+        "--architecture",
+        type=str,
+        default="tanh_linear",
+        help="Policy net architecture: tanh_linear or relu_tanh_linear.",
+    )
+    parser.add_argument(
         "--tag",
         type=str,
         default=None,
@@ -184,12 +197,13 @@ if __name__ == "__main__":
     if args.tag is not None:
         extra_tags.append(args.tag)
 
-    # NOTE - Load cgp genomes to evaluate
-    reference_epoch_ids = get_k_best_genome_ids(RUN_ID, k=args.top_k)
-    cgp_genomes_dict, meta_config = get_genomes_from_run(RUN_ID, reference_epoch_ids)
-    
+    # NOTE - Load cgp genomes to evaluate    
     if args.epoch is not None:
+        cgp_genomes_dict, meta_config = get_genomes_from_run(RUN_ID, [args.epoch])
         cgp_genomes_dict = {args.epoch: cgp_genomes_dict[args.epoch]}
+    else:
+        reference_epoch_ids = get_k_best_genome_ids(RUN_ID, k=args.top_k)
+        cgp_genomes_dict, meta_config = get_genomes_from_run(RUN_ID, reference_epoch_ids)
 
     # NOTE - For each cgp genome, evaluate and compare
     for epoch_id, cgp_genome in cgp_genomes_dict.items():
@@ -222,6 +236,7 @@ if __name__ == "__main__":
             project=args.project,
             entity=args.entity,
             extra_tags=extra_tags,
-            seeds=[285033, 99527, 7],
-            selected_experiences=[args.algo]
+            seeds=[args.seed],
+            selected_experiences=[args.algo],
+            policy_architecture_used=args.architecture
         )

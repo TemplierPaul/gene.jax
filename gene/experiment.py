@@ -263,7 +263,8 @@ def comparison_experiment_cgp(
     seeds: list[int] = [56789, 98712, 1230],
     expe_time=None,
     extra_tags: list[str] = [],
-    selected_experiences: list[str] = ["cgp", "pL2", "L2", "direct"]
+    selected_experiences: list[str] = ["cgp", "pL2", "L2", "direct"],
+    policy_architecture_used: str = "tanh_linear"
 ):
     """Takes a cgp distance function genome, evaluates it and compares it to
     gene encoding with pL2 and L2, direct encoding
@@ -287,6 +288,7 @@ def comparison_experiment_cgp(
         base_config["task"]["episode_length"] = 1000
         base_config["evo"]["population_size"] = 256
         base_config["seed"] = seed
+        base_config["net"]["architecture"] = policy_architecture_used
 
 
         #######################################################################
